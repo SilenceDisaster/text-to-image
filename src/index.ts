@@ -57,13 +57,35 @@ button:hover { background-color: #018786; }
 </head>
 <body>
 <h1>¡Tu imagen ha sido generada!</h1>
+
 <div class="image-container">
-    <img src="/generar-imagen?prompt=${encodeURIComponent(userPrompt)}" alt="Imagen generada por IA">
-</div>
-<div class="options">
-    <a href="/generar-imagen?prompt=${encodeURIComponent(userPrompt)}" download="imagen-ia.png" class="download-btn">Descargar imagen</a>
-    <a href="/" class="new-image-btn">Generar otra imagen</a>
-</div>
+        <img id="generated-image" src="/generar-imagen?prompt=${encodeURIComponent(userPrompt)}" alt="Imagen generada por IA">
+    </div>
+    <div class="options">
+        <a href="#" id="download-link" class="download-btn">Descargar imagen</a>
+        <a href="/" class="new-image-btn">Generar otra imagen</a>
+    </div>
+    <script>
+        document.getElementById('download-link').addEventListener('click', function(event) {
+            event.preventDefault(); // Evita que el enlace navegue
+
+            const imgElement = document.getElementById('generated-image');
+            const imageUrl = imgElement.src;
+
+            fetch(imageUrl)
+                .then(response => response.blob())
+                .then(blob => {
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'imagen-ia.png'; // Nombre del archivo de descarga
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url); // Limpia la URL del objeto
+                });
+        });
+    </script>
 </body>
 </html>`;
             return new Response(htmlResponse, { headers: { "Content-Type": "text/html" } });
