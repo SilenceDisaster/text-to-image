@@ -10,7 +10,8 @@ export default {
       `<!DOCTYPE html>
 <html>
 <head>
-<title>Generador de Imágenes con IA</title>
+<meta charset="UTF-8">
+<title>Generador de Imágenes con IA Oswaldo Rodriguez</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
 <style>
 body { font-family: 'Montserrat', sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; background-color: #121212; color: #e0e0e0; }
