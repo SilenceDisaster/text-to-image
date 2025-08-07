@@ -5,7 +5,7 @@ export default {
         const url = new URL(request.url);
         const userPrompt = url.searchParams.get("prompt");
 
-        // 1. Si no hay prompt en la URL, mostramos el formulario HTML.
+        // 1. Si no hay prompt, muestra el formulario HTML.
         if (!userPrompt) {
             const html =
                 `<!DOCTYPE html>
@@ -27,9 +27,9 @@ button:hover { background-color: #018786; }
 <body>
 <img src="${GatoCibern}" class="cat-image">
 <h1>Generador de Imágenes con IA</h1>
-<form action="/" method="GET">
+<form action="/generar-descargar" method="GET">
 <input type="text" name="prompt" placeholder="Escribe tu idea aquí..." required>
-<button type="submit">Generar</button>
+<button type="submit">Generar y Descargar</button>
 </form>
 </body>
 </html>
@@ -41,47 +41,26 @@ button:hover { background-color: #018786; }
             });
         }
 
-        // 2. Si hay prompt, generamos la imagen y la guardamos en R2.
+        // 2. Si hay prompt, generamos y descargamos la imagen.
         const inputs = {
             prompt: userPrompt,
         };
 
         try {
-            const response = await env.AI.run(
+            const imageResponse = await env.AI.run(
                 "@cf/stabilityai/stable-diffusion-xl-base-1.0",
                 inputs
             );
-
-            // Crear un nombre de archivo único
-            const filename = `imagen-${Date.now()}.png`;
-
-            // Subir la imagen al bucket de R2
-            await env.MY_BUCKET.put(filename, response);
-
-            // Crear la URL pública para la imagen
-            const imageUrl = `https://<URL_DE_TU_BUCKET_R2>/${filename}`;
-
-            // Devolver una respuesta HTML con la imagen guardada
-            const htmlResponse = `
-                <!DOCTYPE html>
-                <html>
-                    <head>
-                        <title>Imagen Generada</title>
-                        <meta charset="UTF-8">
-                    </head>
-                    <body>
-                        <h1>¡Tu imagen ha sido generada!</h1>
-                        <img src="${imageUrl}">
-                        <br>
-                        <a href="/">Generar otra imagen</a>
-                    </body>
-                </html>
-            `;
-
-            return new Response(htmlResponse, {
-                headers: { "Content-Type": "text/html" },
+            
+            // Devolver la imagen para su descarga
+            return new Response(imageResponse, {
+                headers: {
+                    // Le dice al navegador que el archivo debe ser descargado
+                    "Content-Disposition": `attachment; filename="imagen_ia.png"`,
+                    // Especifica el tipo de archivo
+                    "Content-Type": "image/png",
+                },
             });
-
         } catch (error) {
             return new Response(`Error al generar la imagen: ${error.message}`, {
                 status: 500,
