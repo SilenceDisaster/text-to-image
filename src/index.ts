@@ -67,7 +67,7 @@ button:hover { background-color: #018786; }
 </style>
 </head>
 <body>
-<h1>¡Tu imagen ha sido generada!</h1>
+<h1>¡Espera Tu imagen ha sido generada!</h1>
 <div class="image-container">
     <img src="${imageUrl}" alt="Imagen generada por IA">
 </div>
