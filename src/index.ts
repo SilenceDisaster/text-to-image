@@ -71,7 +71,7 @@ button:hover { background-color: #018786; }
 </div>
 <div class="options">
     <a href="/imagen-data?prompt=${encodeURIComponent(userPrompt)}" download="imagen-ia.png" class="download-btn">Descargar imagen</a>
-    <a href="/generar-y-mostrar?prompt=${encodeURIComponent(userPrompt)}" class="new-image-btn">Generar otra imagen</a>
+    <a href="/" class="new-image-btn">Generar otra imagen</a>
 </div>
 </body>
 </html>`;
