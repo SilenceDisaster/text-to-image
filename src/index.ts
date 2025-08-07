@@ -64,3 +64,44 @@ button:hover { background-color: #018786; }
     }
   },
 };
+try {
+    const response = await env.AI.run(
+        "@cf/stabilityai/stable-diffusion-xl-base-1.0",
+        inputs
+    );
+
+    // 1. Crear un nombre de archivo único
+    const filename = `imagen-${Date.now()}.png`;
+
+    // 2. Subir la imagen al bucket de R2
+    await env.MY_BUCKET.put(filename, response);
+
+    // 3. Crear la URL pública para la imagen
+    const imageUrl = `https://<URL_DE_TU_BUCKET_R2>/${filename}`;
+
+    // 4. Devolver una respuesta HTML con la imagen guardada
+    const htmlResponse = `
+        <!DOCTYPE html>
+        <html>
+            <head>
+                <title>Imagen Generada</title>
+                <meta charset="UTF-8">
+            </head>
+            <body>
+                <h1>¡Tu imagen ha sido generada!</h1>
+                <img src="${imageUrl}">
+                <br>
+                <a href="/">Generar otra imagen</a>
+            </body>
+        </html>
+    `;
+
+    return new Response(htmlResponse, {
+        headers: { "Content-Type": "text/html" },
+    });
+
+} catch (error) {
+    return new Response(`Error al generar la imagen: ${error.message}`, {
+        status: 500,
+    });
+}
