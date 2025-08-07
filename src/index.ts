@@ -22,7 +22,7 @@ button:hover { background-color: #018786; }
 </style>
 </head>
 <body>
-<img src="data:image/GatoCibern.png">
+<img src="${GatoCibern}" class="cat-image">
 <h1>Generador de Imágenes con IA</h1>
 <form action="/" method="GET">
 <input type="text" name="prompt" placeholder="Escribe tu idea aquí..." required>
