@@ -6,7 +6,7 @@ export default {
         const userPrompt = url.searchParams.get("prompt");
 
         // Caso 1: Mostrar el formulario inicial.
-        if (url.pathname === '/') {
+        if (url.pathname === '/' || url.pathname === '/resultado' && !userPrompt) {
             const html =
                 `<!DOCTYPE html>
 <html>
@@ -36,10 +36,21 @@ button:hover { background-color: #018786; }
             return new Response(html, { headers: { "Content-Type": "text/html" } });
         }
 
-        // Caso 2: Mostrar la página de resultados con la imagen.
+        // Caso 2: Generar la imagen y mostrarla en la página de resultados.
         if (url.pathname === '/resultado' && userPrompt) {
-            const htmlResponse =
-                `<!DOCTYPE html>
+            const inputs = { prompt: userPrompt };
+            try {
+                const imageBlob = await env.AI.run(
+                    "@cf/stabilityai/stable-diffusion-xl-base-1.0",
+                    inputs
+                );
+                
+                // Convierte la imagen a un string Base64 para incrustarla en el HTML
+                const imageBase64 = arrayBufferToBase64(imageBlob);
+                const imageUrl = `data:image/png;base64,${imageBase64}`;
+
+                const htmlResponse =
+                    `<!DOCTYPE html>
 <html>
 <head>
 <meta charset="UTF-8">
@@ -57,57 +68,34 @@ button:hover { background-color: #018786; }
 </head>
 <body>
 <h1>¡Tu imagen ha sido generada!</h1>
-
 <div class="image-container">
-        <img id="generated-image" src="/generar-imagen?prompt=${encodeURIComponent(userPrompt)}" alt="Imagen generada por IA">
-    </div>
-    <div class="options">
-        <a href="#" id="download-link" class="download-btn">Descargar imagen</a>
-        <a href="/" class="new-image-btn">Generar otra imagen</a>
-    </div>
-    <script>
-        document.getElementById('download-link').addEventListener('click', function(event) {
-            event.preventDefault(); // Evita que el enlace navegue
-
-            const imgElement = document.getElementById('generated-image');
-            const imageUrl = imgElement.src;
-
-            fetch(imageUrl)
-                .then(response => response.blob())
-                .then(blob => {
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = 'imagen-ia.png'; // Nombre del archivo de descarga
-                    document.body.appendChild(a);
-                    a.click();
-                    document.body.removeChild(a);
-                    URL.revokeObjectURL(url); // Limpia la URL del objeto
-                });
-        });
-    </script>
+    <img src="${imageUrl}" alt="Imagen generada por IA">
+</div>
+<div class="options">
+    <a href="${imageUrl}" download="imagen-ia.png" class="download-btn">Descargar imagen</a>
+    <a href="/" class="new-image-btn">Generar otra imagen</a>
+</div>
 </body>
 </html>`;
-            return new Response(htmlResponse, { headers: { "Content-Type": "text/html" } });
-        }
+                return new Response(htmlResponse, { headers: { "Content-Type": "text/html" } });
 
-        // Caso 3: Generar la imagen y devolverla.
-        if (url.pathname === '/generar-imagen' && userPrompt) {
-            const inputs = { prompt: userPrompt };
-            try {
-                const response = await env.AI.run(
-                    "@cf/stabilityai/stable-diffusion-xl-base-1.0",
-                    inputs
-                );
-                return new Response(response, {
-                    headers: { "Content-Type": "image/png" },
-                });
             } catch (error) {
                 return new Response(`Error al generar la imagen: ${error.message}`, { status: 500 });
             }
         }
-
-        // Caso 4: Ruta no encontrada.
+        
+        // Caso 3: Manejar cualquier otra ruta como no encontrada.
         return new Response("Ruta no encontrada", { status: 404 });
     },
 };
+
+// Función auxiliar para convertir el ArrayBuffer a Base64
+function arrayBufferToBase64(buffer) {
+    let binary = '';
+    const bytes = new Uint8Array(buffer);
+    const len = bytes.byteLength;
+    for (let i = 0; i < len; i++) {
+        binary += String.fromCharCode(bytes[i]);
+    }
+    return btoa(binary);
+}
