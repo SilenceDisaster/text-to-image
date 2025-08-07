@@ -1,3 +1,4 @@
+import {GatoCibern} from './base64_image';
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
