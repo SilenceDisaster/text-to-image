@@ -11,18 +11,19 @@ export default {
 <html>
 <head>
 <title>Generador de Imágenes con IA</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
 <style>
-body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; background-color: #121212; color: #e0e0e0; }
+body { font-family: 'Montserrat', sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; background-color: #121212; color: #e0e0e0; }
 h1 { color: #bb86fc; text-align: center; }
 form { display: flex; gap: 10px; margin-top: 20px; }
 input[type="text"] { width: 400px; padding: 10px; border: 1px solid #333; border-radius: 5px; background-color: #2c2c2c; color: #e0e0e0; }
 button { padding: 10px 20px; border: none; border-radius: 5px; background-color: #03dac6; color: #121212; font-weight: bold; cursor: pointer; }
 button:hover { background-color: #018786; }
-.cat-image { width: 150px; margin-bottom: 20px; }
+.cat-image { width: 300px; height: auto; margin-bottom: 20px; } /* Ajusta el tamaño aquí */
 </style>
 </head>
 <body>
-<img src="${GatoCibern}" class="cat-image" width="1000" height="400">
+<img src="${GatoCibern}" class="cat-image">
 <h1>Generador de Imágenes con IA</h1>
 <form action="/" method="GET">
 <input type="text" name="prompt" placeholder="Escribe tu idea aquí..." required>
