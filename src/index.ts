@@ -27,44 +27,74 @@ button:hover { background-color: #018786; }
 <body>
 <img src="${GatoCibern}" class="cat-image">
 <h1>Generador de Imágenes con IA</h1>
-<form action="/generar-descargar" method="GET">
+<form action="/generar-imagen" method="GET">
 <input type="text" name="prompt" placeholder="Escribe tu idea aquí..." required>
-<button type="submit">Generar y Descargar</button>
+<button type="submit">Generar</button>
 </form>
 </body>
-</html>
-`;
-            return new Response(html, {
-                headers: {
-                    "Content-Type": "text/html",
-                },
-            });
+</html>`;
+            return new Response(html, { headers: { "Content-Type": "text/html" } });
         }
 
-        // 2. Si hay prompt, generamos y descargamos la imagen.
+        // 2. Si hay prompt, genera la imagen y la muestra con opciones.
         const inputs = {
             prompt: userPrompt,
         };
 
         try {
-            const imageResponse = await env.AI.run(
+            const imageBlob = await env.AI.run(
                 "@cf/stabilityai/stable-diffusion-xl-base-1.0",
                 inputs
             );
             
-            // Devolver la imagen para su descarga
-            return new Response(imageResponse, {
-                headers: {
-                    // Le dice al navegador que el archivo debe ser descargado
-                    "Content-Disposition": `attachment; filename="imagen_ia.png"`,
-                    // Especifica el tipo de archivo
-                    "Content-Type": "image/png",
-                },
-            });
+            // Convierte la imagen a un string Base64 para incrustarla en el HTML
+            const imageBase64 = arrayBufferToBase64(imageBlob);
+            const imageUrl = `data:image/png;base64,${imageBase64}`;
+
+            const htmlResponse = `
+                <!DOCTYPE html>
+                <html>
+                    <head>
+                        <title>Imagen Generada</title>
+                        <meta charset="UTF-8">
+                        <style>
+                            body { font-family: 'Montserrat', sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; background-color: #121212; color: #e0e0e0; }
+                            .image-container { text-align: center; }
+                            .image-container img { max-width: 80%; height: auto; margin-bottom: 20px; border: 2px solid #03dac6; }
+                            .options { display: flex; gap: 20px; }
+                            .options a { text-decoration: none; padding: 10px 20px; border-radius: 5px; font-weight: bold; }
+                            .download-btn { background-color: #bb86fc; color: #121212; }
+                            .new-image-btn { background-color: #03dac6; color: #121212; }
+                        </style>
+                    </head>
+                    <body>
+                        <h1>¡Tu imagen ha sido generada!</h1>
+                        <div class="image-container">
+                            <img src="${imageUrl}">
+                        </div>
+                        <div class="options">
+                            <a href="${imageUrl}" download="imagen-ia.png" class="download-btn">Descargar imagen</a>
+                            <a href="/" class="new-image-btn">Generar otra imagen</a>
+                        </div>
+                    </body>
+                </html>
+            `;
+
+            return new Response(htmlResponse, { headers: { "Content-Type": "text/html" } });
+
         } catch (error) {
-            return new Response(`Error al generar la imagen: ${error.message}`, {
-                status: 500,
-            });
+            return new Response(`Error al generar la imagen: ${error.message}`, { status: 500 });
         }
     },
 };
+
+// Función auxiliar para convertir el ArrayBuffer a Base64
+function arrayBufferToBase64(buffer) {
+    let binary = '';
+    const bytes = new Uint8array(buffer);
+    const len = bytes.byteLength;
+    for (let i = 0; i < len; i++) {
+        binary += String.fromCharCode(bytes[i]);
+    }
+    return btoa(binary);
+}
