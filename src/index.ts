@@ -91,7 +91,7 @@ button:hover { background-color: #018786; }
 // Función auxiliar para convertir el ArrayBuffer a Base64
 function arrayBufferToBase64(buffer) {
     let binary = '';
-    const bytes = new Uint8array(buffer);
+    const bytes = new Uint8Array(buffer); // <-- La "A" ahora está en mayúscula
     const len = bytes.byteLength;
     for (let i = 0; i < len; i++) {
         binary += String.fromCharCode(bytes[i]);
